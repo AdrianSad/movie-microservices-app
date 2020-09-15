@@ -20,12 +20,9 @@ import java.util.stream.Collectors;
 @RequestMapping("/catalog")
 public class CatalogController {
 
-    private final RestTemplate restTemplate;
-
     private final WebClient.Builder webClientBuilder;
 
-    public CatalogController(RestTemplate restTemplate, WebClient.Builder webClientBuilder) {
-        this.restTemplate = restTemplate;
+    public CatalogController(WebClient.Builder webClientBuilder) {
         this.webClientBuilder = webClientBuilder;
     }
 
@@ -35,14 +32,14 @@ public class CatalogController {
         Mono<Rating> ratings = webClientBuilder
                 .build()
                 .get()
-                .uri("http://localhost:8083/ratings/" + movieId)
+                .uri("http://ratings-service/ratings/" + movieId)
                 .retrieve()
                 .bodyToMono(Rating.class);
 
         Mono<MovieInfo> movieInfo = ratings.flatMap(rating -> webClientBuilder
                 .build()
                 .get()
-                .uri("http://localhost:8082/movies/" + rating.getMovieId())
+                .uri("http://info-service/movies/" + rating.getMovieId())
                 .retrieve()
                 .bodyToMono(MovieInfo.class));
 
