@@ -1,47 +1,33 @@
 package pl.adrian.catalogservice.controllers;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.reactive.function.client.WebClient;
 import pl.adrian.catalogservice.models.Movie;
 import pl.adrian.catalogservice.models.MovieInfo;
 import pl.adrian.catalogservice.models.Rating;
-import pl.adrian.catalogservice.models.UserRating;
-import reactor.core.publisher.Flux;
+import pl.adrian.catalogservice.services.CatalogService;
 import reactor.core.publisher.Mono;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/catalog")
 public class CatalogController {
 
-    private final WebClient.Builder webClientBuilder;
+    private final CatalogService catalogService;
 
-    public CatalogController(WebClient.Builder webClientBuilder) {
-        this.webClientBuilder = webClientBuilder;
+    public CatalogController(CatalogService catalogService) {
+        this.catalogService = catalogService;
     }
 
     @RequestMapping("/{movieId}")
     public Mono<Movie> getMovieItem(@PathVariable String movieId) {
 
-        Mono<Rating> ratings = webClientBuilder
-                .build()
-                .get()
-                .uri("http://ratings-service/ratings/" + movieId)
-                .retrieve()
-                .bodyToMono(Rating.class);
 
-        Mono<MovieInfo> movieInfo = ratings.flatMap(rating -> webClientBuilder
-                .build()
-                .get()
-                .uri("http://info-service/movies/" + rating.getMovieId())
-                .retrieve()
-                .bodyToMono(MovieInfo.class));
+        Mono<Rating> ratings = catalogService.getRating(movieId);
+
+        Mono<MovieInfo> movieInfo = catalogService.getMovieInfo(movieId);
+
 
         return Mono.zip(ratings, movieInfo).map(data -> {
             Movie tempMovie = new Movie();
@@ -52,4 +38,8 @@ public class CatalogController {
             return tempMovie;
         });
     }
+
+
+
+
 }

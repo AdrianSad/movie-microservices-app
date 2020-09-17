@@ -24,8 +24,8 @@ public class RatingController {
     public Flux<Rating> getUserRatings(@PathVariable String userId){
 
         return Flux.just(
-                new Rating("1", 5),
-                new Rating("2", 2)
+                new Rating("100", 5),
+                new Rating("200", 2)
         );
     }
 }

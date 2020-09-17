@@ -5,13 +5,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@NoArgsConstructor
-@AllArgsConstructor
 @Getter
 @Setter
-public class MovieInfo {
+@NoArgsConstructor
+@AllArgsConstructor
+public class MovieSummary {
 
     private String movieId;
     private String title;
-    private String desc;
+    private String overview;
 }

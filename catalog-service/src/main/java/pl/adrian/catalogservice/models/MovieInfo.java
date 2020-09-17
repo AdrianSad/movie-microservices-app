@@ -14,6 +14,4 @@ public class MovieInfo {
     private String movieId;
     private String title;
     private String desc;
-    private String director;
-    private String country;
 }
