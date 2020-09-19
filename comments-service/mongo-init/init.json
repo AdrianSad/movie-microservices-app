@@ -1,0 +1,58 @@
+[
+  {
+    "movieId": "100",
+    "content": "Awesome movie"
+  },
+  {
+    "movieId": "101",
+    "content": "I recommend it."
+  },
+  {
+    "movieId": "102",
+    "content": "Great movie."
+  },
+  {
+    "movieId": "102",
+    "content": "What a plot!"
+  },
+  {
+  "movieId": "103",
+  "content": "Totally boring, i wasted time watching it."
+  },
+  {
+    "movieId": "104",
+    "content": "I would watch it one more time. Lovely movie."
+  },
+  {
+    "movieId": "105",
+    "content": "Nothing special..."
+  },
+  {
+    "movieId": "106",
+    "content": "I don't understand hype for this movie. 2/10"
+  },
+  {
+    "movieId": "107",
+    "content": "Can't imagine better ending."
+  },
+  {
+    "movieId": "108",
+    "content": "Plot 7/10, special effects 9/10, actors 10/10"
+  },
+  {
+    "movieId": "109",
+    "content": "I fell asleep during it."
+  },
+  {
+    "movieId": "110",
+    "content": "The most interesting movie I've ever seen!"
+  },
+  {
+    "movieId": "110",
+    "content": "So good"
+  },
+  {
+    "movieId": "110",
+    "content": "I will go to the cinema one more time for sure."
+  }
+]

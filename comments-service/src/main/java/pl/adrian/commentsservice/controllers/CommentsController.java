@@ -1,21 +1,36 @@
 package pl.adrian.commentsservice.controllers;
 
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 import pl.adrian.commentsservice.models.Comment;
+import pl.adrian.commentsservice.models.CommentRequest;
+import pl.adrian.commentsservice.repositories.CommentRepository;
 import reactor.core.publisher.Flux;
-
-import java.util.Collections;
-import java.util.List;
+import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/comments")
 public class CommentsController {
 
-    @RequestMapping("/{movieId}")
-    public Flux<Comment> getMovieItem(@PathVariable String movieId) {
+    private final CommentRepository commentRepository;
 
-        return Flux.just(new Comment(movieId, "comment"));
+    public CommentsController(CommentRepository commentRepository) {
+        this.commentRepository = commentRepository;
+    }
+
+
+    @GetMapping("/{movieId}")
+    public Flux<Comment> getMovieComments(@PathVariable String movieId) {
+
+        return commentRepository.findAllByMovieId(movieId);
+    }
+
+    @PostMapping
+    public Mono<Comment> createMovieItem(@RequestBody CommentRequest commentRequest) {
+
+        Comment comment = new Comment();
+        comment.setContent(commentRequest.getContent());
+        comment.setMovieId(commentRequest.getMovieId());
+        return commentRepository.save(comment);
     }
 }

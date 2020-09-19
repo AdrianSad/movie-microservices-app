@@ -1,0 +1,47 @@
+version: "3"
+services:
+
+  mongo:
+    image: mongo
+    restart: always
+    container_name: mongo
+    volumes:
+      - ./database:/data
+#    environment:
+#      - MONGO_DATA_DIR=/data/db
+#      - MONGO_LOG_DIR=/dev/null
+    ports:
+      - "27017:27017"
+
+  mongo-init:
+    build: comments-service/mongo-init
+    image: movies-microservice-app_mongo-init
+    links:
+      - mongo
+
+
+  discovery-server:
+    image: movies-microservice-app_discovery-server
+    build:
+      context: discovery-server/
+    container_name: discovery-server
+    ports:
+      - "8761:8761"
+
+  comments-service:
+    image: movies-microservice-app_comments-service
+    build:
+      context: comments-service/
+      dockerfile: Docker/Dockerfile
+    container_name: comments-service
+    ports:
+      - "8084:8084"
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka
+      SPRING_DATA_MONGODB_HOST: mongo
+    links:
+      - mongo
+      - discovery-server
+    depends_on:
+      - mongo
+      - discovery-server
