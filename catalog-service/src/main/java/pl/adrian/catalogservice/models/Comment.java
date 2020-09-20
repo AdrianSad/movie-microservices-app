@@ -9,9 +9,9 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
-public class Rating {
+public class Comment {
 
     private String id;
     private String movieId;
-    private int rating;
+    private String content;
 }

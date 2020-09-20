@@ -1,31 +1,35 @@
 package pl.adrian.ratingsservice.controllers;
 
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import pl.adrian.ratingsservice.models.Rating;
-import pl.adrian.ratingsservice.models.UserRating;
+import pl.adrian.ratingsservice.repositories.RatingRepository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.util.Arrays;
-import java.util.List;
 
 @RestController
 @RequestMapping("/ratings")
 public class RatingController {
 
-    @RequestMapping("/{movieId}")
-    public Mono<Rating> getRating(@PathVariable String movieId){
-        return Mono.just(new Rating(movieId, 5));
+    private final RatingRepository ratingRepository;
+
+    public RatingController(RatingRepository ratingRepository) {
+        this.ratingRepository = ratingRepository;
     }
 
-    @RequestMapping("/users/{userId}")
+    @GetMapping("/{movieId}")
+    public Mono<Rating> getRating(@PathVariable String movieId){
+        return ratingRepository.findByMovieId(movieId);
+    }
+
+    @GetMapping("/users/{userId}")
     public Flux<Rating> getUserRatings(@PathVariable String userId){
 
         return Flux.just(
-                new Rating("100", 5),
-                new Rating("200", 2)
+                new Rating("1","100", 5),
+                new Rating("2","200", 2)
         );
     }
 }

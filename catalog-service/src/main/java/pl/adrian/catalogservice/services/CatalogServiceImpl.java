@@ -12,9 +12,13 @@ import org.springframework.cloud.netflix.hystrix.HystrixCommands;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.reactive.function.client.WebClient;
+import pl.adrian.catalogservice.models.Comment;
 import pl.adrian.catalogservice.models.MovieInfo;
 import pl.adrian.catalogservice.models.Rating;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -39,12 +43,13 @@ public class CatalogServiceImpl implements CatalogService{
                 .get()
                 .uri("http://ratings-service/ratings/" + movieId)
                 .retrieve()
-                .bodyToMono(Rating.class));
+                .bodyToMono(Rating.class))
+                .defaultIfEmpty(new Rating("0", "0", 0));
 
         return HystrixCommands.from(ratingMono)
                 .commandName("movieRating")
                 .commandProperties(commandProperties)
-                .fallback(Mono.just(new Rating("0", 0)))
+                .fallback(Mono.just(new Rating("0", "0", 0)))
                 .toMono();
     }
 
@@ -61,5 +66,22 @@ public class CatalogServiceImpl implements CatalogService{
                 .commandProperties(commandProperties)
                 .fallback(Mono.just(new MovieInfo("0", "No movie info", "")))
                 .toMono();
+    }
+
+    @Override
+    public Flux<Comment> getMovieComments(String movieId) {
+        Flux<Comment> commentsFlux = (webClientBuilder
+                .build()
+                .get()
+                .uri("http://comments-service/comments/" + movieId)
+                .retrieve()
+                .bodyToFlux(Comment.class))
+                .switchIfEmpty(Flux.empty());
+
+        return HystrixCommands.from(commentsFlux)
+                .commandName("movieComments")
+                .commandProperties(commandProperties)
+                .fallback(Flux.empty())
+                .toFlux();
     }
 }

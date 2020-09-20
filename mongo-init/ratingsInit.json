@@ -1,0 +1,46 @@
+[
+  {
+    "movieId": "100",
+    "rating": 5
+  },
+  {
+  "movieId": "101",
+  "rating": 2
+  },
+  {
+  "movieId": "102",
+  "rating": 4
+  },
+  {
+    "movieId": "103",
+    "rating": 1
+  },
+  {
+    "movieId": "104",
+    "rating": 4
+  },
+  {
+    "movieId": "105",
+    "rating": 2
+  },
+  {
+    "movieId": "106",
+    "rating": 5
+  },
+  {
+    "movieId": "107",
+    "rating": 5
+  },
+  {
+    "movieId": "108",
+    "rating": 3
+  },
+  {
+    "movieId": "109",
+    "rating": 1
+  },
+  {
+    "movieId": "110",
+    "rating": 4
+  }
+]

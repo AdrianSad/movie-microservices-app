@@ -10,8 +10,7 @@ services:
       - "27017:27017"
 
   mongo-init:
-    build: comments-service/mongo-init
-    image: movies-microservice-app_mongo-init
+    build: mongo-init
     links:
       - mongo
 
@@ -52,4 +51,36 @@ services:
       - discovery-server
     depends_on:
       - mongo
+      - discovery-server
+
+  ratings-service:
+    build:
+      context: ratings-service/
+      dockerfile: Dockerfile
+    container_name: ratings-service
+    ports:
+      - "8083:8083"
+    environment:
+      - EUREKA_SERVER=http://discovery-server:8761/eureka/
+      - SPRING_DATA_MONGODB_HOST=mongo
+    links:
+      - mongo
+      - discovery-server
+    depends_on:
+      - mongo
+      - discovery-server
+
+  info-service:
+    build:
+      context: info-service/
+      dockerfile: Dockerfile
+    container_name: info-service
+    ports:
+      - "8082:8082"
+    environment:
+      - EUREKA_SERVER=http://discovery-server:8761/eureka/
+      - theMovieDBApiKey=fd06ef227cc90782327903efdf3f73d8
+    links:
+      - discovery-server
+    depends_on:
       - discovery-server
