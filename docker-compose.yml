@@ -10,7 +10,7 @@ services:
       - "27017:27017"
 
   mongo-init:
-    build: mongo-init
+    build: docker/mongo-init
     links:
       - mongo
 
@@ -79,8 +79,20 @@ services:
       - "8082:8082"
     environment:
       - EUREKA_SERVER=http://discovery-server:8761/eureka/
-      - theMovieDBApiKey=fd06ef227cc90782327903efdf3f73d8
+      - theMovieDBApiKey=
     links:
       - discovery-server
     depends_on:
       - discovery-server
+
+  grafana-server:
+    build: docker/grafana
+    container_name: grafana-server
+    ports:
+      - 3000:3000
+
+  prometheus-server:
+    build: docker/prometheus
+    container_name: prometheus-server
+    ports:
+      - 9090:9090
