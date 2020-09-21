@@ -1,16 +1,11 @@
 package pl.adrian.catalogservice.services;
 
-import com.netflix.hystrix.HystrixCommandKey;
-import com.netflix.hystrix.HystrixCommandMetrics;
 import com.netflix.hystrix.HystrixCommandProperties;
-import com.netflix.hystrix.HystrixEventType;
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.client.circuitbreaker.ReactiveCircuitBreaker;
 import org.springframework.cloud.client.circuitbreaker.ReactiveCircuitBreakerFactory;
 import org.springframework.cloud.netflix.hystrix.HystrixCommands;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.reactive.function.client.WebClient;
 import pl.adrian.catalogservice.models.Comment;
 import pl.adrian.catalogservice.models.MovieInfo;
@@ -18,13 +13,12 @@ import pl.adrian.catalogservice.models.Rating;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.stream.Collectors;
-
 @Slf4j
 @Service
-public class CatalogServiceImpl implements CatalogService{
+public class CatalogServiceImpl implements CatalogService {
 
     private final WebClient.Builder webClientBuilder;
+    private final ReactiveCircuitBreakerFactory reactiveCircuitBreakerFactory;
 
     private final HystrixCommandProperties.Setter commandProperties = HystrixCommandProperties
             .defaultSetter()
@@ -33,55 +27,50 @@ public class CatalogServiceImpl implements CatalogService{
             .withCircuitBreakerErrorThresholdPercentage(50)
             .withCircuitBreakerSleepWindowInMilliseconds(5000);
 
-    public CatalogServiceImpl(WebClient.Builder webClientBuilder) {
+    public CatalogServiceImpl(WebClient.Builder webClientBuilder, ReactiveCircuitBreakerFactory reactiveCircuitBreakerFactory) {
         this.webClientBuilder = webClientBuilder;
+        this.reactiveCircuitBreakerFactory = reactiveCircuitBreakerFactory;
     }
 
     public Mono<Rating> getRating(String movieId) {
-        Mono<Rating> ratingMono = (webClientBuilder
+        return webClientBuilder
                 .build()
                 .get()
                 .uri("http://ratings-service/ratings/" + movieId)
                 .retrieve()
-                .bodyToMono(Rating.class))
-                .defaultIfEmpty(new Rating("0", "0", 0));
-
-        return HystrixCommands.from(ratingMono)
-                .commandName("movieRating")
-                .commandProperties(commandProperties)
-                .fallback(Mono.just(new Rating("0", "0", 0)))
-                .toMono();
+                .bodyToMono(Rating.class)
+                .defaultIfEmpty(new Rating("0", "0", 0))
+                .transform(it -> {
+                    ReactiveCircuitBreaker reactiveCircuitBreaker = reactiveCircuitBreakerFactory.create("rating");
+                    return reactiveCircuitBreaker.run(it, throwable -> Mono.just(new Rating("0", "0", 0)));
+                });
     }
 
     public Mono<MovieInfo> getMovieInfo(String movieId) {
-        Mono<MovieInfo> infoMono = (webClientBuilder
+        return webClientBuilder
                 .build()
                 .get()
                 .uri("http://info-service/movies/" + movieId)
                 .retrieve()
-                .bodyToMono(MovieInfo.class));
-
-        return HystrixCommands.from(infoMono)
-                .commandName("movieInfo")
-                .commandProperties(commandProperties)
-                .fallback(Mono.just(new MovieInfo("0", "No movie info", "")))
-                .toMono();
+                .bodyToMono(MovieInfo.class)
+                .transform(it -> {
+                    ReactiveCircuitBreaker reactiveCircuitBreaker = reactiveCircuitBreakerFactory.create("info");
+                    return reactiveCircuitBreaker.run(it, throwable -> Mono.just(new MovieInfo("0", "No movie info", "")));
+                });
     }
 
     @Override
     public Flux<Comment> getMovieComments(String movieId) {
-        Flux<Comment> commentsFlux = (webClientBuilder
+        return (webClientBuilder
                 .build()
                 .get()
                 .uri("http://comments-service/comments/" + movieId)
                 .retrieve()
                 .bodyToFlux(Comment.class))
-                .switchIfEmpty(Flux.empty());
-
-        return HystrixCommands.from(commentsFlux)
-                .commandName("movieComments")
-                .commandProperties(commandProperties)
-                .fallback(Flux.empty())
-                .toFlux();
+                .switchIfEmpty(Flux.empty())
+                .transform(it -> {
+                    ReactiveCircuitBreaker reactiveCircuitBreaker = reactiveCircuitBreakerFactory.create("comment");
+                    return reactiveCircuitBreaker.run(it, throwable -> Flux.empty());
+                });
     }
 }
