@@ -1,10 +1,9 @@
 package pl.adrian.catalogservice.services;
 
-import com.netflix.hystrix.HystrixCommandProperties;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.client.circuitbreaker.ReactiveCircuitBreaker;
 import org.springframework.cloud.client.circuitbreaker.ReactiveCircuitBreakerFactory;
-import org.springframework.cloud.netflix.hystrix.HystrixCommands;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import pl.adrian.catalogservice.models.Comment;
@@ -14,18 +13,17 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Slf4j
+@Setter
 @Service
 public class CatalogServiceImpl implements CatalogService {
 
     private final WebClient.Builder webClientBuilder;
     private final ReactiveCircuitBreakerFactory reactiveCircuitBreakerFactory;
 
-    private final HystrixCommandProperties.Setter commandProperties = HystrixCommandProperties
-            .defaultSetter()
-            .withExecutionTimeoutInMilliseconds(1500)
-            .withCircuitBreakerRequestVolumeThreshold(5)
-            .withCircuitBreakerErrorThresholdPercentage(50)
-            .withCircuitBreakerSleepWindowInMilliseconds(5000);
+    // TESTS PURPOSE
+    private String ratingServer = "http://ratings-service";
+    private String infoServer = "http://info-service";
+    private String commenstServer = "http://comments-service";
 
     public CatalogServiceImpl(WebClient.Builder webClientBuilder, ReactiveCircuitBreakerFactory reactiveCircuitBreakerFactory) {
         this.webClientBuilder = webClientBuilder;
@@ -36,7 +34,7 @@ public class CatalogServiceImpl implements CatalogService {
         return webClientBuilder
                 .build()
                 .get()
-                .uri("http://ratings-service/ratings/" + movieId)
+                .uri(ratingServer + "/ratings/" + movieId)
                 .retrieve()
                 .bodyToMono(Rating.class)
                 .defaultIfEmpty(new Rating("0", "0", 0))
@@ -50,7 +48,7 @@ public class CatalogServiceImpl implements CatalogService {
         return webClientBuilder
                 .build()
                 .get()
-                .uri("http://info-service/movies/" + movieId)
+                .uri(infoServer + "/movies/" + movieId)
                 .retrieve()
                 .bodyToMono(MovieInfo.class)
                 .transform(it -> {
@@ -64,7 +62,7 @@ public class CatalogServiceImpl implements CatalogService {
         return (webClientBuilder
                 .build()
                 .get()
-                .uri("http://comments-service/comments/" + movieId)
+                .uri(commenstServer + "/comments/" + movieId)
                 .retrieve()
                 .bodyToFlux(Comment.class))
                 .switchIfEmpty(Flux.empty())

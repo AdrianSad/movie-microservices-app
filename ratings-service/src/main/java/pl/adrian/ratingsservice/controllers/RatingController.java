@@ -24,12 +24,4 @@ public class RatingController {
         return ratingRepository.findByMovieId(movieId);
     }
 
-    @GetMapping("/users/{userId}")
-    public Flux<Rating> getUserRatings(@PathVariable String userId){
-
-        return Flux.just(
-                new Rating("1","100", 5),
-                new Rating("2","200", 2)
-        );
-    }
 }

@@ -55,4 +55,3 @@ Example api usage :
 
  - Spring cloud configuration server
  - Frontend service
- - Tests
