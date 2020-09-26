@@ -3,6 +3,7 @@
 Reactive Spring application showing communication between microservices. They are connected by Eureka Service Discovery from the Spring Cloud Netflix technology stack.
 Catalog service makes a call to other services for example info service with fault resistance provided by Resilience4j.
 If one of services is slow or not responding Resilience4j provide a break circuit and fallback. Everything is monitored and measured in metrics by Prometheus and then displayed by Grafana.
+Services are configured by Spring Clound Config. When starting with a docker compose there is a timeout 20s to fetch data from config-server. 
 
 You can access services at given location :
 
@@ -30,7 +31,7 @@ Clone repository :
 
 `https://github.com/AdrianSad/movie-microservices-app.git`
 
-Insert your own theMovieDBApiKey in docker-compose.yml
+Insert your own theMovieDBApiKey in docker-compose.yml or Spring Cloud Config
 
 Start every service :
 
@@ -53,5 +54,5 @@ Example api usage :
 
 ## TODO list
 
- - Spring cloud configuration server
  - Frontend service
+ - Secure Spring Cloud Server access

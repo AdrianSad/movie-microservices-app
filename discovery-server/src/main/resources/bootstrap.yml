@@ -1,0 +1,6 @@
+spring:
+  cloud:
+    config:
+      uri: ${SPRING_CLOUD_SERVER:http://localhost:8888}
+  application:
+    name: discovery-server

@@ -14,6 +14,13 @@ services:
     links:
       - mongo
 
+  config-server:
+    build:
+      context: config-server/
+      dockerfile: Dockerfile
+    container_name: config-server
+    ports:
+    - "8888:8888"
 
   discovery-server:
     build:
@@ -21,6 +28,12 @@ services:
     container_name: discovery-server
     ports:
       - "8761:8761"
+    environment:
+      - SPRING_CLOUD_SERVER=http://config-server:8888/
+    links:
+      - config-server
+    depends_on:
+      - config-server
 
   catalog-service:
     build:
@@ -31,10 +44,13 @@ services:
       - "8081:8081"
     environment:
       - EUREKA_SERVER=http://discovery-server:8761/eureka/
+      - SPRING_CLOUD_SERVER=http://config-server:8888/
     links:
       - discovery-server
+      - config-server
     depends_on:
       - discovery-server
+      - config-server
 
   comments-service:
     build:
@@ -46,12 +62,15 @@ services:
     environment:
       - EUREKA_SERVER=http://discovery-server:8761/eureka/
       - SPRING_DATA_MONGODB_HOST=mongo
+      - SPRING_CLOUD_SERVER=http://config-server:8888/
     links:
       - mongo
       - discovery-server
+      - config-server
     depends_on:
       - mongo
       - discovery-server
+      - config-server
 
   ratings-service:
     build:
@@ -63,12 +82,15 @@ services:
     environment:
       - EUREKA_SERVER=http://discovery-server:8761/eureka/
       - SPRING_DATA_MONGODB_HOST=mongo
+      - SPRING_CLOUD_SERVER=http://config-server:8888/
     links:
       - mongo
       - discovery-server
+      - config-server
     depends_on:
       - mongo
       - discovery-server
+      - config-server
 
   info-service:
     build:
@@ -80,10 +102,13 @@ services:
     environment:
       - EUREKA_SERVER=http://discovery-server:8761/eureka/
       - theMovieDBApiKey=
+      - SPRING_CLOUD_SERVER=http://config-server:8888/
     links:
       - discovery-server
+      - config-server
     depends_on:
       - discovery-server
+      - config-server
 
   grafana-server:
     build: docker/grafana
